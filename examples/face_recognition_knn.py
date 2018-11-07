@@ -78,7 +78,21 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
 
         # Loop through each training image for the current person
         for img_path in image_files_in_folder(os.path.join(train_dir, class_dir)):
+            ## Hàm load_image_file(file, mode='RGB'): dùng chuyển đổi ảnh (.jpg, .png, ...) thành numpy array
+            ## Input:
+                ## file: tên file ảnh
+                ## mode: chỉ hỗ trợ dạng ảnh Red Green Blue 'RGB' (8-bit RGB, 3 channels) và Greyscale 'L' (black and white). Mặc định = 'RGB'
+            ## Output: numpy array
             image = face_recognition.load_image_file(img_path)
+
+            ## Hàm face_locations(img, number_of_times_to_upsample=1, model="hog"):
+                ## Xác định khung giới hạn của tất cả khuôn mặt trong ảnh
+            ## Input:
+                ## img: numpy array của ảnh
+                ## number_of_times_to_upsample: số lần upsample ảnh để tìm kiếm khuôn mặt. Số lần lớn sẽ tìm kiếm được nhiều khuôn mặt nhỏ nhưng tốn nhiều chi phí xử lý. Mặc định = 1
+                            ## (Upsample ảnh là thực hiện tăng kích thước của ảnh theo một tỷ lệ nào đó. Khi đó, ta có thể phát hiện được những khuôn mặt nhỏ do ở xa, ...)
+                ## model: mô hình nhận dạng khuôn mặt để sử dụng. Các mô hình có thể sử dụng "hog" (ít chính xác, chạy nhanh trên CPUs) và "cnn" (chính xác hơn "hog" nhưng cần GPU/CUDA để tăng tốc độ)
+            ## Output: danh sách các face locations (top, right, bottom, left)
             face_bounding_boxes = face_recognition.face_locations(image)
 
             if len(face_bounding_boxes) != 1:
@@ -97,6 +111,15 @@ def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree
             print("Chose n_neighbors automatically:", n_neighbors)
 
     # Create and train the KNN classifier
+    ## Hàm sklearn.neighbors.KNeighborsClassifier(n_neighbors=5, weights=’uniform’, algorithm=’auto’, leaf_size=30, p=2, metric=’minkowski’, metric_params=None, n_jobs=None, **kwargs)
+        ## Phân loại thực hiện người láng giềng gần nhất
+    ## Input:
+        ## n_neighbors: số người láng giềng để sử dụng theo mặc định cho truy vấn kneighbors
+        ## weights: hàm trọng số sử dụng trong dự đoán
+        ## algorithm: thuật toán sử dụng người láng giềng gần nhất
+        ## ...
+    ## Output: object của lớp KNeighborsClassifier
+    ## Xem thêm ở http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
     knn_clf = neighbors.KNeighborsClassifier(n_neighbors=n_neighbors, algorithm=knn_algo, weights='distance')
     knn_clf.fit(X, y)
 
@@ -140,6 +163,14 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
         return []
 
     # Find encodings for faces in the test iamge
+    ## Hàm face_encodings(face_image, known_face_locations=None, num_jitters=1):
+        ## Dùng chuyển đổi numpy array thành mảng gồm một hoặc nhiều danh sách.
+        ## Mỗi danh sách tương ứng với một khuôn mặt trong ảnh và có 128 phần tử mã hóa khuôn mặt (128-dimension face encoding). Được gọi là face_encoding
+    ## Input:
+        ## face_image: numpy array của ảnh (ảnh có thể chứa một hoặc nhiều khuôn mặt)
+        ## known_face_locations: Khung giới hạn của mỗi khuôn mặt trong trường hợp bạn đã biết trước rồi. Mặc định = None
+        ## num_jitters: số lần lấy mẫu lại khi tính toán các phần từ mã hóa. Trường hợp num_jitters > 1 sẽ lấy mẫu nhiều lần, sau đó tính trung bình. Mặc định = 1
+    ## Output: mảng các danh sách phần tử mã hóa khuôn mặt
     faces_encodings = face_recognition.face_encodings(X_img, known_face_locations=X_face_locations)
 
     # Use the KNN model to find the best matches for the test face

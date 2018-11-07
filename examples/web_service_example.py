@@ -88,8 +88,21 @@ def detect_faces_in_image(file_stream):
                             0.07417042,  0.07126575,  0.00209804]
 
     # Load the uploaded image file
+    ## Hàm load_image_file(file, mode='RGB'): dùng chuyển đổi ảnh (.jpg, .png, ...) thành numpy array
+    ## Input:
+        ## file: tên file ảnh
+        ## mode: chỉ hỗ trợ dạng ảnh Red Green Blue 'RGB' (8-bit RGB, 3 channels) và Greyscale 'L' (black and white). Mặc định = 'RGB'
+    ## Output: numpy array
     img = face_recognition.load_image_file(file_stream)
     # Get face encodings for any faces in the uploaded image
+    ## Hàm face_encodings(face_image, known_face_locations=None, num_jitters=1):
+        ## Dùng chuyển đổi numpy array thành mảng gồm một hoặc nhiều danh sách.
+        ## Mỗi danh sách tương ứng với một khuôn mặt trong ảnh và có 128 phần tử mã hóa khuôn mặt (128-dimension face encoding). Được gọi là face_encoding
+    ## Input:
+        ## face_image: numpy array của ảnh (ảnh có thể chứa một hoặc nhiều khuôn mặt)
+        ## known_face_locations: Khung giới hạn của mỗi khuôn mặt trong trường hợp bạn đã biết trước rồi. Mặc định = None
+        ## num_jitters: số lần lấy mẫu lại khi tính toán các phần từ mã hóa. Trường hợp num_jitters > 1 sẽ lấy mẫu nhiều lần, sau đó tính trung bình. Mặc định = 1
+    ## Output: mảng các danh sách phần tử mã hóa khuôn mặt
     unknown_face_encodings = face_recognition.face_encodings(img)
 
     face_found = False
@@ -98,6 +111,13 @@ def detect_faces_in_image(file_stream):
     if len(unknown_face_encodings) > 0:
         face_found = True
         # See if the first face in the uploaded image matches the known face of Obama
+        ## Hàm compare_faces(known_face_encodings, face_encoding_to_check, tolerance=0.6):
+            ## So sánh danh sách các face encoding đã biết với face encoding cần test xem chúng có khớp nhau hay không
+        ## Input:
+            ## known_face_encodings: danh sách các face encoding đã biết
+            ## face_encoding_to_check: face encoding cần test
+            ## tolerance: ngưỡng khoảng cách được xem là khớp. Khoảng cách giữa 2 face encodings <= ngưỡng này. tolerance = 0.6 cho hiệu suất tốt nhất.
+        ## Output: danh sách True/False cho biết known_face_encodings khớp với face_encoding_to_check
         match_results = face_recognition.compare_faces([known_face_encoding], unknown_face_encodings[0])
         if match_results[0]:
             is_obama = True

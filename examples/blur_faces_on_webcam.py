@@ -21,6 +21,14 @@ while True:
     small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
 
     # Find all the faces and face encodings in the current frame of video
+    # Hàm face_locations(img, number_of_times_to_upsample=1, model="hog"):
+    ## Xác định khung giới hạn của tất cả khuôn mặt trong ảnh
+    ## Input:
+        ## img: numpy array của ảnh
+        ## number_of_times_to_upsample: số lần upsample ảnh để tìm kiếm khuôn mặt. Số lần lớn sẽ tìm kiếm được nhiều khuôn mặt nhỏ nhưng tốn nhiều chi phí xử lý. Mặc định = 1
+                    ## (Upsample ảnh là thực hiện tăng kích thước của ảnh theo một tỷ lệ nào đó. Khi đó, ta có thể phát hiện được những khuôn mặt nhỏ do ở xa, ...)
+        ## model: mô hình nhận dạng khuôn mặt để sử dụng. Các mô hình có thể sử dụng "hog" (ít chính xác, chạy nhanh trên CPUs) và "cnn" (chính xác hơn "hog" nhưng cần GPU/CUDA để tăng tốc độ)
+    ## Output: danh sách các face locations (top, right, bottom, left)
     face_locations = face_recognition.face_locations(small_frame, model="cnn")
 
     # Display the results
