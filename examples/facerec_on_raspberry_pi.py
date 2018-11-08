@@ -15,11 +15,14 @@ import numpy as np
 # enabled your camera in raspi-config and rebooted first.
 camera = picamera.PiCamera()
 camera.resolution = (320, 240)
+## Tạo array rỗng có kích thước bằng resolution của camera để chứa hình ảnh chụp được từ camera
 output = np.empty((240, 320, 3), dtype=np.uint8)
 
 # Load a sample picture and learn how to recognize it.
 print("Loading known face image(s)")
 obama_image = face_recognition.load_image_file("obama_small.jpg")
+
+## Hàm 'face_encodings' trả về mỗi array 128-dimension encoding cho mỗi khuôn mặt
 obama_face_encoding = face_recognition.face_encodings(obama_image)[0]
 
 # Initialize some variables
@@ -32,13 +35,18 @@ while True:
     camera.capture(output, format="rgb")
 
     # Find all the faces and face encodings in the current frame of video
+    ## face_locations: tìm kiếm các khuôn mặt có trong ảnh và trả về vị trí các bounding boxes
     face_locations = face_recognition.face_locations(output)
     print("Found {} faces in image.".format(len(face_locations)))
+    
+    ## face_encodings: trả về mỗi array 128-dimension encoding cho mỗi khuôn mặt, trong trường hợp đã biết face_locations
     face_encodings = face_recognition.face_encodings(output, face_locations)
 
     # Loop over each face found in the frame to see if it's someone we know.
     for face_encoding in face_encodings:
         # See if the face is a match for the known face(s)
+        ## Tính khoảng cách (độ khác nhau) giữa khuôn mặt đã biết với khuôn mặt tìm được trong khung hình, với ngưỡng <= tolerance (default=0.6) được xem là cùng 1 người
+        ## compare_faces: trả về giá trị True hoặc False
         match = face_recognition.compare_faces([obama_face_encoding], face_encoding)
         name = "<Unknown Person>"
 

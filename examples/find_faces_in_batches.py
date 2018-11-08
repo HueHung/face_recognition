@@ -20,8 +20,9 @@ video_capture = cv2.VideoCapture("short_hamilton_clip.mp4")
 frames = []
 frame_count = 0
 
-while video_capture.isOpened():
+while video_capture.isOpened(): ## Trả về True nếu quá trình capture đã được khởi tạo
     # Grab a single frame of video
+    ## Hàm .read() trả về 1 giá trị bool 'ret' = True/False cho biết khung hình có được đọc hay không và 'frame' là array các pixel của khung hình đó
     ret, frame = video_capture.read()
 
     # Bail out when the video file ends
@@ -37,17 +38,24 @@ while video_capture.isOpened():
 
     # Every 128 frames (the default batch size), batch process the list of frames to find faces
     if len(frames) == 128:
+        ## batch_face_locations: trả về array 2-dimension chứa các bounding boxes của các khuôn mặt tìm được
+        ## number_of_times_to_upsample: phóng to hình ảnh lên số lần bằng  number_of_times_to_upsample
+        ## batch_size: số lượng hình ảnh trong mỗi lần xử lý, default=128
         batch_of_face_locations = face_recognition.batch_face_locations(frames, number_of_times_to_upsample=0)
 
         # Now let's list all the faces we found in all 128 frames
         for frame_number_in_batch, face_locations in enumerate(batch_of_face_locations):
+            
+            ## Số lượng khuôn mặt tìm được trong hình
             number_of_faces_in_frame = len(face_locations)
-
+          
+            ## Lấy ra thứ tự của khung hình đang xét trong tổng số hình cắt được từ video
             frame_number = frame_count - 128 + frame_number_in_batch
             print("I found {} face(s) in frame #{}.".format(number_of_faces_in_frame, frame_number))
 
             for face_location in face_locations:
                 # Print the location of each face in this frame
+                ## top, right, bottom, left: vị trí các đỉnh của bounding boxes
                 top, right, bottom, left = face_location
                 print(" - A face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom, right))
 
