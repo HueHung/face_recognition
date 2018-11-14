@@ -1,0 +1,1 @@
+We are excited about bringing pull requests into Visual Studio Code, as we believe it will simplify the way you review source code. Our GitHub extension is just the first example of integrating source control platform providers for code reviews in Visual Studio Code.
